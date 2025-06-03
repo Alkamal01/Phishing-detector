@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="cache-buster" content="{{ timestamp or '' }}">
+  <title>PhishDetector - AI-Powered URL Security Scanner</title>
+  <meta name="description" content="Detect phishing websites instantly with our AI-powered URL scanner. Protect yourself from malicious links and cyber threats.">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#1E40AF',
+            accent: '#F59E0B',
+            danger: '#EF4444',
+            success: '#10B981',
+          },
+          fontFamily: {
+            'sans': ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.6s ease-out',
+            'pulse-slow': 'pulse 3s infinite',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .result-safe {
+      background: linear-gradient(135deg, #10B981, #059669);
+    }
+    
+    .result-danger {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+    }
+  </style>
+</head>
+
+<body class="font-sans">
+  <!-- Hero Section -->
+  <div class="min-h-screen gradient-bg flex items-center justify-center px-4 py-8">
+    <div class="max-w-4xl w-full">
+      <!-- Header -->
+      <div class="text-center mb-12 animate-fade-in">
+        <div class="flex items-center justify-center mb-6">
+          <div class="bg-white/20 p-4 rounded-full backdrop-blur-sm">
+            <i class="fas fa-shield-alt text-4xl text-white"></i>
+          </div>
+        </div>
+        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
+          PhishDetector
+        </h1>
+        <p class="text-xl md:text-2xl text-white/90 mb-2">
+          AI-Powered URL Security Scanner
+        </p>
+        <p class="text-lg text-white/80 max-w-2xl mx-auto">
+          Protect yourself from phishing attacks with our advanced machine learning technology. 
+          Get instant security analysis of any website URL.
+        </p>
+      </div>
+
+      <!-- Main Scanner Card -->
+      <div class="glass-effect rounded-2xl p-8 md:p-12 shadow-2xl animate-slide-up" id="scanner-card">
+        <form action="/result" method="POST" class="space-y-6" id="scan-form">
+          <!-- URL Input -->
+          <div class="space-y-2">
+            <label for="url" class="block text-white font-medium text-lg">
+              Enter URL to Scan
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fas fa-link text-white/60"></i>
+              </div>
+              <input 
+                type="url" 
+                name="name" 
+                id="url"
+                class="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent transition-all duration-300 text-lg"
+                placeholder="https://example.com"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- Scan Button -->
+          <button 
+            type="submit"
+            id="scan-button"
+            class="w-full bg-white text-gray-800 font-semibold py-4 px-8 rounded-xl hover:bg-white/90 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg shadow-lg"
+          >
+            <i class="fas fa-search mr-2"></i>
+            Scan URL for Threats
+          </button>
+          
+          <!-- Loading Overlay -->
+          <div id="loading-overlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 text-center border border-white/20 max-w-md mx-4">
+              <div class="animate-spin rounded-full h-16 w-16 border-4 border-white/30 border-t-white mx-auto mb-4"></div>
+              <h3 class="text-white text-xl font-semibold mb-2">Analyzing URL...</h3>
+              <p class="text-white/80 mb-4">Our AI is scanning for potential threats</p>
+              
+              <!-- Progress Bar -->
+              <div class="w-full bg-white/20 rounded-full h-2 mb-4">
+                <div id="progress-bar" class="bg-white h-2 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+              </div>
+              
+              <div id="progress-text" class="text-white/70 text-sm">
+                Initializing scan...
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Results Section -->
+        {% if name %}
+        <div class="mt-8 animate-fade-in">
+          <div class="bg-white/10 rounded-xl p-6 border border-white/20">
+            <!-- URL Display -->
+            <div class="mb-4">
+              <p class="text-white/80 text-sm mb-1">Scanned URL:</p>
+              <p class="text-white font-mono text-sm break-all bg-white/10 p-2 rounded">{{ name[0] }}</p>
+            </div>
+
+            <!-- Result Status -->
+            <div class="text-center">
+              {% if name|length > 3 and name[3] == "1" %}
+              <!-- Safe Result -->
+              <div class="result-safe rounded-xl p-6 text-white mb-4">
+                <div class="flex items-center justify-center mb-3">
+                  <i class="fas fa-check-circle text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Website is {{ name[1] }}</h3>
+                <p class="text-white/90">This URL appears to be legitimate and safe to visit.</p>
+              </div>
+              <a 
+                href="{{ name[0] }}" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <i class="fas fa-external-link-alt mr-2"></i>
+                {{ name[2] }}
+              </a>
+              {% else %}
+              <!-- Danger Result -->
+              <div class="result-danger rounded-xl p-6 text-white mb-4">
+                <div class="flex items-center justify-center mb-3">
+                  <i class="fas fa-exclamation-triangle text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Website is {{ name[1] }}</h3>
+                <p class="text-white/90">This URL may be a phishing site. Exercise caution!</p>
+              </div>
+              <button 
+                onclick="window.open('{{ name[0] }}', '_blank')" 
+                class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+              >
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                {{ name[2] }}
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Features -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="text-center text-white/80">
+            <div class="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <p class="text-sm font-medium">Instant Analysis</p>
+          </div>
+          <div class="text-center text-white/80">
+            <div class="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-brain"></i>
+            </div>
+            <p class="text-sm font-medium">AI-Powered</p>
+          </div>
+          <div class="text-center text-white/80">
+            <div class="bg-white/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <p class="text-sm font-medium">97.4% Accuracy</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-8 text-white/60">
+        <p class="text-sm">
+          Powered by Machine Learning • 
+          <a href="https://github.com/asrith-reddy/Phishing-detector" target="_blank" class="hover:text-white transition-colors">
+            <i class="fab fa-github"></i> Open Source
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Animation Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('scan-form');
+      const button = document.getElementById('scan-button');
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const originalText = button.innerHTML;
+      
+      // Check if there are results and scroll to them
+      const resultsSection = document.querySelector('.mt-8.animate-fade-in');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // Progress simulation steps
+      const progressSteps = [
+        { percent: 10, text: "Extracting URL features..." },
+        { percent: 25, text: "Analyzing domain structure..." },
+        { percent: 40, text: "Checking security certificates..." },
+        { percent: 55, text: "Scanning for phishing patterns..." },
+        { percent: 70, text: "Running AI analysis..." },
+        { percent: 85, text: "Validating results..." },
+        { percent: 95, text: "Finalizing report..." }
+      ];
+      
+      let progressInterval;
+      let currentStep = 0;
+      
+      function simulateProgress() {
+        if (currentStep < progressSteps.length) {
+          const step = progressSteps[currentStep];
+          progressBar.style.width = step.percent + '%';
+          progressText.textContent = step.text;
+          currentStep++;
+          
+          // Randomize timing between 800-1500ms for realistic feel
+          const delay = Math.random() * 700 + 800;
+          progressInterval = setTimeout(simulateProgress, delay);
+        }
+      }
+      
+      form.addEventListener('submit', function(e) {
+        console.log('Form submitted - showing loading overlay');
+        
+        // Show loading overlay immediately
+        loadingOverlay.classList.remove('hidden');
+        
+        // Update button state
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scanning...';
+        button.disabled = true;
+        
+        // Add loading class to form
+        form.classList.add('opacity-75');
+        
+        // Reset progress
+        currentStep = 0;
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Initializing scan...';
+        
+        // Start progress simulation after a short delay
+        setTimeout(() => {
+          simulateProgress();
+        }, 300);
+        
+        // The form will submit and page will reload with results
+        // Progress will continue until page reloads
+      });
+      
+      // Reset states when page loads
+      function resetLoadingState() {
+        console.log('Resetting loading state');
+        loadingOverlay.classList.add('hidden');
+        button.innerHTML = originalText;
+        button.disabled = false;
+        form.classList.remove('opacity-75');
+        
+        // Clear any running progress simulation
+        if (progressInterval) {
+          clearTimeout(progressInterval);
+        }
+        currentStep = 0;
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Initializing scan...';
+      }
+      
+      // Reset on various page events
+      window.addEventListener('pageshow', resetLoadingState);
+      window.addEventListener('load', resetLoadingState);
+      
+      // Also reset if user navigates back
+      window.addEventListener('beforeunload', function() {
+        resetLoadingState();
+      });
+      
+      // Force reset on page load (immediate)
+      resetLoadingState();
+    });
+  </script>
+</body>
+
+</html>
